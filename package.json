@@ -1,0 +1,13 @@
+{
+  "name": "fitness-calculator",
+  "version": "1.0.0",
+  "description": "Fitness calculator using OOP in TypeScript",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && open index.html"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Kalkulačka - Tréninkový Deník</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        #summary { margin-top: 20px; }
+        .activity { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Fitness Kalkulačka - Tréninkový Deník</h1>
+    <form id="activityForm">
+        <label for="activitySelect">Vyberte aktivitu:</label>
+        <select id="activitySelect" required>
+            <!-- Options will be populated by JS -->
+        </select>
+        
+        <div id="specificInputs">
+            <!-- Specific inputs for cardio or strength -->
+        </div>
+        
+        <button type="submit">Přidat aktivitu</button>
+    </form>
+    
+    <h2>Denní přehled</h2>
+    <div id="activities"></div>
+    
+    <h2>Souhrn</h2>
+    <div id="summary"></div>
+    
+    <script src="dist/main.js"></script>
+</body>
+</html>
