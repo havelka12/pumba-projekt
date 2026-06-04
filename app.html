@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness Deník</title>
+    <style>
+        :root {
+            --bg: #f8fbff;
+            --surface: #ffffff;
+            --surface-alt: #eef4ff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --border: #dbeafe;
+            --primary: #2563eb;
+            --primary-soft: #dbecff;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+        }
+        .page-shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 28px 0 48px;
+        }
+        header {
+            margin-bottom: 24px;
+        }
+        h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 3vw, 3rem);
+            letter-spacing: -0.04em;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+        .top-bar a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px 28px 28px 30px;
+            margin-bottom: 28px;
+        }
+        .panel .section-heading,
+        .panel .form-row {
+            margin-left: 0;
+            padding-left: 0;
+        }
+        .panel .form-row > div {
+            padding-left: 4px;
+        }
+        .layout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 32px;
+            align-items: start;
+        }
+        .main-column { display: grid; gap: 28px; }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .challenge-box,
+        .goal-box,
+        .fact-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .challenge-box,
+        .goal-box {
+            border-color: #c7e0ff;
+        }
+        .challenge-box h3,
+        .goal-box h3,
+        .fact-box h3 { margin: 0 0 12px; font-size: 1.05rem; }
+        .challenge-box p,
+        .goal-box p,
+        .fact-box p { margin: 0; color: var(--text-muted); line-height: 1.75; }
+        .fact-badge {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .fact-badge:hover {
+            transform: scale(1.08);
+            background: #dbeafe;
+        }
+        .challenge-box ul,
+        .goal-box ul {
+            margin: 14px 0 0;
+            padding-left: 20px;
+            color: var(--text);
+        }
+        .challenge-box li,
+        .goal-box li {
+            margin-bottom: 10px;
+        }
+        .panel form {
+            margin: 0;
+            padding: 0;
+        }
+        .panel .form-row > div {
+            margin: 0;
+            padding: 0;
+        }
+        .form-row { display: grid; gap: 20px; }
+        label { font-weight: 700; margin-bottom: 8px; margin-left: 0; display: block; }
+        input, select {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            background: #ffffff;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.14);
+        }
+        .button-row { display: flex; justify-content: flex-end; }
+        button {
+            border: none;
+            border-radius: 18px;
+            padding: 14px 22px;
+            font-weight: 700;
+            color: #ffffff;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        .section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+        .section-heading h2 { margin: 0; font-size: 1.35rem; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 720px; }
+        th, td { padding: 16px 18px; border-bottom: 1px solid #eef2ff; text-align: left; }
+        th { background: #eef5ff; color: #1e40af; font-weight: 700; }
+        tbody tr:hover { background: #f8fbff; }
+        .summary-card { background: var(--surface-alt); border: 1px solid #dbeafe; border-radius: 22px; padding: 20px; }
+        .summary-card strong { display: block; margin-bottom: 10px; }
+        .no-data { color: var(--text-muted); text-align: center; padding: 24px 0; }
+        @media (max-width: 760px) {
+            .page-shell { width: calc(100% - 24px); }
+            .layout-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+            .section-heading { flex-direction: column; align-items: flex-start; }
+            .button-row { justify-content: stretch; }
+            button { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header>
+            <div class="top-bar">
+                <div>
+                    <h1>Fitness Deník</h1>
+                    <p style="margin:0; color: var(--text-muted); font-size: 1rem;">Zaznamenávej cvičení a sleduj denní výsledky.</p>
+                </div>
+                <a href="index.html">Zpět na domovskou</a>
+            </div>
+        </header>
+
+        <div class="layout-grid">
+            <div class="main-column">
+                <section class="challenge-box">
+                    <h3>Dnešní výzva</h3>
+                    <p>Vyber si jednu z těchto mini výzev a zapiš její výsledek do deníku:</p>
+                    <ul>
+                        <li>20 minut rychlé chůze nebo běhu</li>
+                        <li>3 série dřepů nebo výpadů</li>
+                        <li>15 minut jízdy na kole nebo rotopedu</li>
+                    </ul>
+                </section>
+                <section class="goal-box">
+                    <h3>Cíle týdne</h3>
+                    <p>Nastav si jednoduchý cíl a sleduj svůj postup během týdne:</p>
+                    <ul>
+                        <li>3 tréninky tento týden</li>
+                        <li>750 spálených kcal</li>
+                        <li>4 aktivní dny</li>
+                    </ul>
+                </section>
+                <section class="panel">
+                    <div class="section-heading">
+                        <h2>Přidej novou aktivitu</h2>
+                    </div>
+            <form id="activityForm">
+                <div class="form-row">
+                    <div>
+                        <label for="activitySelect">Vyber aktivitu</label>
+                        <select id="activitySelect" required></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div id="specificInputs"></div>
+                </div>
+                <div class="form-row">
+                    <div>
+                        <label for="daySelect">Den</label>
+                        <select id="daySelect" required>
+                            <option value="Pondělí">Pondělí</option>
+                            <option value="Úterý">Úterý</option>
+                            <option value="Středa">Středa</option>
+                            <option value="Čtvrtek">Čtvrtek</option>
+                            <option value="Pátek">Pátek</option>
+                            <option value="Sobota">Sobota</option>
+                            <option value="Neděle">Neděle</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="submit">Přidat aktivitu</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <h2>Denní přehled</h2>
+            </div>
+            <div id="activities"></div>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <h2>Souhrn</h2>
+            </div>
+            <div id="summary"></div>
+        </section>
+            </div>
+            <aside class="sidebar">
+                <div class="fact-box" data-facts="Krátká rozcvička před tréninkem pomáhá snížit riziko zranění a zlepšuje výkon.|Pětiminutové rozcvičení zlepší mobilitu a pomůže ti začít trénink silněji.|Správné zahřátí snižuje únavu a přispívá k lepšímu pocitu po cvičení.">
+                    <h3>Funfact</h3>
+                    <button type="button" class="fact-badge" aria-label="Další funfact">⟳</button>
+                    <p>Krátká rozcvička před tréninkem pomáhá snížit riziko zranění a zlepšuje výkon.</p>
+                </div>
+                <div class="fact-box" data-facts="Silový trénink obvykle zvyšuje klidový metabolismus až o několik procent.|Pravidelné posilování zlepšuje držení těla a stabilitu páteře.|Silový trénink podporuje spalování tuků i v klidovém režimu.">
+                    <h3>Funfact</h3>
+                    <button type="button" class="fact-badge" aria-label="Další funfact">⟳</button>
+                    <p>Silový trénink obvykle zvyšuje klidový metabolismus až o několik procent.</p>
+                </div>
+                <div class="fact-box" data-facts="Pravidelné záznamy ti pomáhají rychleji poznat, které aktivity tě opravdu posouvají.|Psaní tréninkového deníku zvyšuje motivaci a pomáhá vylepšovat plánování.|Zapisování výsledků ti umožňuje sledovat pokrok a učit se ze zkušeností.">
+                    <h3>Funfact</h3>
+                    <button type="button" class="fact-badge" aria-label="Další funfact">⟳</button>
+                    <p>Pravidelné záznamy ti pomáhají rychleji poznat, které aktivity tě opravdu posouvají.</p>
+                </div>
+            </aside>
+        </div>
+
+        <script src="dist/classes.js"></script>
+        <script src="dist/data.js"></script>
+        <script src="dist/main.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.fact-box').forEach(box => {
+                    const button = box.querySelector('.fact-badge');
+                    const paragraph = box.querySelector('p');
+                    const facts = (box.dataset.facts || '').split('|').map(item => item.trim()).filter(Boolean);
+                    if (!button || !paragraph || facts.length === 0) return;
+
+                    let activeIndex = 0;
+                    button.addEventListener('click', () => {
+                        activeIndex = (activeIndex + 1) % facts.length;
+                        paragraph.textContent = facts[activeIndex];
+                    });
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

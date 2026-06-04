@@ -3,41 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fitness Kalkulačka - Tréninkový Deník</title>
+    <title>Fitness Kalkulačka</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        form { margin-bottom: 20px; }
-        label { display: block; margin-top: 10px; }
-        input, select { width: 100%; padding: 8px; margin-top: 5px; }
-        button { padding: 10px 20px; margin-top: 10px; }
-        #summary { margin-top: 20px; }
-        .activity { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        :root {
+            --bg: #eef4ff;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #6b7280;
+            --border: #dbeafe;
+            --primary: #2563eb;
+            --accent: #f97316;
+            --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #eef4ff 0%, #f8fbff 100%);
+        }
+        .page-shell {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 40px 0 48px;
+        }
+        header {
+            max-width: 780px;
+            margin: 0 auto 40px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: clamp(2.4rem, 4vw, 3.4rem);
+            line-height: 1.02;
+        }
+        p.lead {
+            margin: 18px auto 0;
+            max-width: 680px;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+        .page-grid {
+            display: flex;
+            justify-content: center;
+            padding: 0 0 20px;
+        }
+        .hero-panel {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+            gap: 28px;
+            align-items: center;
+            max-width: 980px;
+            margin: 0 auto 32px;
+            padding: 28px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(99, 102, 241, 0.04));
+            border: 1px solid rgba(37, 99, 235, 0.12);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+        }
+        .hero-panel h2 {
+            margin: 0 0 14px;
+            font-size: clamp(1.6rem, 2.4vw, 2rem);
+        }
+        .hero-panel p {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+        .hero-features {
+            display: grid;
+            gap: 12px;
+        }
+        .feature-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: #ffffff;
+            border: 1px solid rgba(37, 99, 235, 0.14);
+            color: var(--text);
+            font-weight: 700;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.06);
+        }
+        .hero-visual {
+            display: grid;
+            place-items: center;
+            min-height: 240px;
+            border-radius: 28px;
+            background: radial-gradient(circle at 30% 30%, rgba(37, 99, 235, 0.18), transparent 35%), radial-gradient(circle at 70% 40%, rgba(249, 115, 22, 0.16), transparent 30%), linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-visual::before {
+            content: '';
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 10px solid rgba(37, 99, 235, 0.16);
+            top: 20px;
+            left: 20px;
+        }
+        .hero-visual::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 8px solid rgba(249, 115, 22, 0.18);
+            bottom: 20px;
+            right: 30px;
+        }
+        .hero-icon {
+            width: 160px;
+            height: 160px;
+            border-radius: 32px;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 3rem;
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.22);
+            position: relative;
+            z-index: 1;
+        }
+        .hero-icon span {
+            transform: rotate(-20deg);
+            display: inline-block;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            transition: transform 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); }
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 1.35rem;
+        }
+        .card p {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+            line-height: 1.75;
+        }
+        .actions {
+            display: grid;
+            gap: 14px;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 24px;
+            border-radius: 18px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.22);
+        }
+        .button.secondary {
+            background: #475569;
+        }
+        .small-note {
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+        @media (max-width: 860px) {
+            .page-grid { grid-template-columns: 1fr; }
+            .cards { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .page-shell { padding: 28px 0 36px; }
+        }
     </style>
 </head>
 <body>
-    <h1>Fitness Kalkulačka - Tréninkový Deník</h1>
-    <form id="activityForm">
-        <label for="activitySelect">Vyberte aktivitu:</label>
-        <select id="activitySelect" required>
-            <!-- Options will be populated by JS -->
-        </select>
-        
-        <div id="specificInputs">
-            <!-- Specific inputs for cardio or strength -->
+    <div class="page-shell">
+        <header>
+            <h1>Vítej ve Fitness Kalkulačce</h1>
+            <p class="lead">Vyber si, kam chceš pokračovat: do denního deníku nebo na týdenní shrnutí s přehledem tréninků.</p>
+        </header>
+
+        <section class="hero-panel">
+            <div>
+                <h2>Začni svou fitness cestu s jasným přehledem.</h2>
+                <p>Vytvoř si deník tréninků, sleduj kalorie a udrž si motivaci bez složitých tabulek.</p>
+                <div class="hero-features">
+                    <div class="feature-chip">✅ Denní zápis</div>
+                    <div class="feature-chip">🔥 Spálené kalorie</div>
+                    <div class="feature-chip">📈 Týdenní přehled</div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-icon"><span>💪</span></div>
+            </div>
+        </section>
+
+        <div class="page-grid">
+            <div>
+                <div class="cards">
+                    <div class="card">
+                        <h2>Deníkové cvičení</h2>
+                        <p>Přidej aktivitu, sleduj okamžitě spálené kalorie a měj denní přehled přehledně v tabulce.</p>
+                        <div class="actions">
+                            <a class="button" href="app.html">Otevřít deník</a>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>Týdenní shrnutí</h2>
+                        <p>Zobrazí se přehled týdne s celkovými tréninky, kaloriemi a nejčastějšími sporty. Skvělé pro plánování dalšího týdne.</p>
+                        <div class="actions">
+                            <a class="button secondary" href="weekly-summary.html">Zobrazit shrnutí</a>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="small-note">Tip: Klikni na "Otevřít deník" pro aplikaci, kde můžeš přidávat aktivity. "Týdenní shrnutí" ukáže přehled týdne.</p>
+            </div>
         </div>
-        
-        <button type="submit">Přidat aktivitu</button>
-    </form>
-    
-    <h2>Denní přehled</h2>
-    <div id="activities"></div>
-    
-    <h2>Souhrn</h2>
-    <div id="summary"></div>
-    
-    <!-- Skripty v správném pořadí: najpřív třídy, pak data, pak logika -->
-    <script src="dist/classes.js"></script>
-    <script src="dist/data.js"></script>
-    <script src="dist/main.js"></script>
+    </div>
 </body>
 </html>

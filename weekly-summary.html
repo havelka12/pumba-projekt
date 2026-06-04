@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Týdenní Shrnutí</title>
+    <style>
+        :root {
+            --bg: #f7f9ff;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-muted: #566274;
+            --border: #d9e2ff;
+            --primary: #2563eb;
+            --accent: #fb923c;
+            --shadow: 0 20px 50px rgba(15, 23, 42, 0.09);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #f7f9ff 0%, #eef4ff 100%);
+            color: var(--text);
+        }
+        .page-shell {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 32px 0 48px;
+        }
+        header {
+            margin-bottom: 28px;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: flex-start;
+            justify-items: stretch;
+            width: 100%;
+            gap: 16px;
+        }
+        .header-left {
+            justify-self: start;
+        }
+        .header-right {
+            justify-self: end;
+        }
+        .header-title {
+            min-width: 0;
+            text-align: center;
+        }
+        h1 { margin: 0 0 10px; font-size: clamp(2rem, 3vw, 2.8rem); }
+        .subtitle { margin: 0; color: var(--text-muted); font-size: 1rem; line-height: 1.7; }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+        .layout-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 32px;
+            align-items: start;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .fact-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        .fact-box h3 { margin: 0 0 12px; font-size: 1.05rem; }
+        .fact-box p { margin: 0; color: var(--text-muted); line-height: 1.75; }
+        .fact-badge {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            background: #eff6ff;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .fact-badge:hover {
+            transform: scale(1.08);
+            background: #dbeafe;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+        }
+        .stat-card {
+            background: #f8fbff;
+            border: 1px solid #dbeafe;
+            border-radius: 22px;
+            padding: 22px;
+        }
+        .stat-card h3 { margin: 0 0 10px; font-size: 1rem; color: var(--text-muted); }
+        .stat-card p { margin: 0; font-size: 1.8rem; font-weight: 800; }
+        .summary-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .summary-table th, .summary-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #e5e7ff; }
+        .summary-table th { color: #1e40af; font-weight: 700; background: #eff6ff; }
+        .summary-table tbody tr:hover { background: #f5f9ff; }
+        .tag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-weight: 700; font-size: 0.95rem; }
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        .button, .button-row a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 22px;
+            border-radius: 18px;
+            text-decoration: none;
+            color: #ffffff;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            font-weight: 700;
+        }
+        .button.secondary,
+        .button-row a.secondary {
+            background: #475569;
+        }
+        @media (max-width: 900px) {
+            .layout-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 640px) {
+            .page-shell { padding: 24px 0 34px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header>
+            <div class="header-left">
+                <a class="button secondary" href="index.html">Zpět na hlavní stránku</a>
+            </div>
+            <div class="header-title">
+                <h1>Týdenní shrnutí</h1>
+                <p class="subtitle">Rychlý přehled celého týdne: kolik tréninků, kolik kalorií a které aktivity dominovaly.</p>
+            </div>
+            <div class="header-right">
+                <a class="button" href="app.html">Otevřít fitness deník</a>
+            </div>
+        </header>
+
+        <div class="layout-grid">
+            <div>
+                <section class="panel">
+                    <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Tréninků tento týden</h3>
+                    <p id="stat-count">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Spálených kalorií</h3>
+                    <p id="stat-calories">0 kcal</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Nejčastější aktivita</h3>
+                    <p id="stat-top">-</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px;">
+                <div>
+                    <h2 style="margin:0;font-size:1.4rem;">Přehled dní</h2>
+                    <p class="subtitle" style="margin-top:8px;">Jak se měnil výkon během týdne.</p>
+                </div>
+                <span class="tag">Stabilní růst</span>
+            </div>
+            <div class="table-wrapper">
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Den</th>
+                            <th>Aktivní minuty</th>
+                            <th>Kalorie</th>
+                            <th>Hlavní sport</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekly-body">
+                        <tr><td colspan="4" class="no-data">Načítám uložené aktivity...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+            </div>
+            <aside class="sidebar">
+                <div class="fact-box" data-facts="&quot;Vítězství není něco, co najdeš. Vítězství je něco, co si vyděláš.&quot; – Arnold Schwarzenegger|&quot;Dělám svou práci s vášní, protože chci být nejlepší.&quot; – Cristiano Ronaldo|&quot;Když věříš, neexistují limity.&quot; – Lionel Messi">
+                    <h3>Motivační citát</h3>
+                    <button type="button" class="fact-badge" aria-label="Další citát">⟳</button>
+                    <p>"Vítězství není něco, co najdeš. Vítězství je něco, co si vyděláš." – Arnold Schwarzenegger</p>
+                </div>
+                <div class="fact-box" data-facts="&quot;Neexistuje vyčerpání. Existuje pouze touha být lepší, která vás žene dál.&quot; – Ronnie Coleman|&quot;Hra je o srdci. Pokud nemáš srdce, nemáš nic.&quot; – Zlatan Ibrahimović|&quot;Když trénuješ každý den, budíš se lepší verzí sebe samého.&quot; – Kylian Mbappé">
+                    <h3>Motivační citát</h3>
+                    <button type="button" class="fact-badge" aria-label="Další citát">⟳</button>
+                    <p>"Neexistuje vyčerpání. Existuje pouze touha být lepší, která vás žene dál." – Ronnie Coleman</p>
+                </div>
+                <div class="fact-box" data-facts="&quot;Tvůj největší rival není nikdo jiný než ten člověk, kterého vidíš v zrcadle.&quot; – Jay Cutler|&quot;Rychlost není všechno. Když zůstatek rozum a srdce, získáš vše.&quot; – Usain Bolt|&quot;Jsem tady, abych ukázal, že limity neexistují.&quot; – Robert Lewandowski">
+                    <h3>Motivační citát</h3>
+                    <button type="button" class="fact-badge" aria-label="Další citát">⟳</button>
+                    <p>"Tvůj největší rival není nikdo jiný než ten člověk, kterého vidíš v zrcadle." – Jay Cutler</p>
+                </div>
+            </aside>
+        </div>
+    <script>
+        const STORAGE_KEY = 'fitness-activities';
+        const daysOrder = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
+
+        function loadSavedActivities() {
+            try {
+                const raw = window.localStorage.getItem(STORAGE_KEY);
+                if (!raw) return [];
+                return JSON.parse(raw);
+            } catch {
+                return [];
+            }
+        }
+
+        function renderWeeklySummary() {
+            const activities = loadSavedActivities();
+            const countEl = document.getElementById('stat-count');
+            const caloriesEl = document.getElementById('stat-calories');
+            const topEl = document.getElementById('stat-top');
+            const body = document.getElementById('weekly-body');
+
+            if (!body || !countEl || !caloriesEl || !topEl) return;
+
+            if (activities.length === 0) {
+                countEl.textContent = '0';
+                caloriesEl.textContent = '0 kcal';
+                topEl.textContent = '-';
+                body.innerHTML = '<tr><td colspan="4" class="no-data">Zatím nejsou uloženy žádné aktivity.</td></tr>';
+                return;
+            }
+
+            let totalCalories = 0;
+            const activityCounts = new Map();
+            const dayStats = Object.fromEntries(daysOrder.map(day => [day, { minutes: 0, calories: 0, activityMap: new Map() }]));
+
+            activities.forEach(item => {
+                const time = item.time || 0;
+                const sets = item.sets || 0;
+                const calories = item.type === 'cardio'
+                    ? time * item.calorieRate
+                    : sets * item.calorieRate;
+                const minutes = item.type === 'cardio' ? time : sets * 8;
+
+                totalCalories += calories;
+                activityCounts.set(item.name, (activityCounts.get(item.name) || 0) + 1);
+
+                const dayEntry = dayStats[item.day];
+                if (dayEntry) {
+                    dayEntry.minutes += minutes;
+                    dayEntry.calories += calories;
+                    dayEntry.activityMap.set(item.name, (dayEntry.activityMap.get(item.name) || 0) + 1);
+                }
+            });
+
+            const topActivity = Array.from(activityCounts.entries()).sort((a, b) => b[1] - a[1])[0];
+            countEl.textContent = String(activities.length);
+            caloriesEl.textContent = `${totalCalories} kcal`;
+            topEl.textContent = topActivity ? topActivity[0] : '-';
+
+            body.innerHTML = '';
+            daysOrder.forEach(day => {
+                const stat = dayStats[day];
+                const bestActivity = Array.from(stat.activityMap.entries()).sort((a, b) => b[1] - a[1])[0];
+                const mainSport = bestActivity ? bestActivity[0] : '-';
+                const minutesLabel = stat.minutes > 0 ? `${stat.minutes} min` : '-';
+                const caloriesLabel = stat.calories > 0 ? `${stat.calories} kcal` : '-';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${day}</td>
+                    <td>${minutesLabel}</td>
+                    <td>${caloriesLabel}</td>
+                    <td>${mainSport}</td>
+                `;
+                body.appendChild(row);
+            });
+        }
+
+        renderWeeklySummary();
+        bindQuoteButtons();
+
+        function bindQuoteButtons() {
+            document.querySelectorAll('.fact-box').forEach(box => {
+                const button = box.querySelector('.fact-badge');
+                const paragraph = box.querySelector('p');
+                const facts = (box.dataset.facts || '').split('|').map(item => item.trim()).filter(Boolean);
+                if (!button || !paragraph || facts.length === 0) return;
+
+                let activeIndex = 0;
+                button.addEventListener('click', () => {
+                    activeIndex = (activeIndex + 1) % facts.length;
+                    paragraph.textContent = facts[activeIndex];
+                });
+            });
+        }
+    </script>
+</body>
+</html>
