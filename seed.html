@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>Seed LocalStorage</title>
+  <style>body{font-family:system-ui;padding:28px}</style>
+</head>
+<body>
+  <h1>Seed LocalStorage</h1>
+  <p>Tato stránka vloží několik ukázkových aktivit do `localStorage` pod klíč <strong>fitness-activities</strong>.</p>
+  <button id="seed">Vložit testovací data</button>
+  <button id="clear">Vymazat data</button>
+  <p style="margin-top:18px">Po vložení otevřete <a href="/weekly-summary.html">weekly-summary.html</a>.</p>
+
+  <script>
+    const STORAGE_KEY = 'fitness-activities';
+
+    const sample = [
+      { id: 1, name: 'Běh', type: 'cardio', calorieRate: 10, day: 'Pondělí', time: 30 },
+      { id: 4, name: 'Silový trénink', type: 'strength', calorieRate: 5, day: 'Úterý', sets: 3 },
+      { id: 2, name: 'Plavání', type: 'cardio', calorieRate: 8, day: 'Středa', time: 45 }
+    ];
+
+    document.getElementById('seed').addEventListener('click', () => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sample));
+      alert('Data uložena do localStorage. Otevřete weekly-summary.html.');
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      alert('Data odstraněna.');
+    });
+  </script>
+</body>
+</html>

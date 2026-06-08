@@ -8,7 +8,23 @@ Aplikace demonstruje polymorfismus, factory pattern, validaci dat a čisté kód
 1. Nainstalujte Node.js a npm (pokud nemáte).
 2. Spusťte `npm install` pro instalaci závislostí.
 3. Spusťte `npm run build` pro kompilaci TypeScriptu do JavaScriptu.
-4. Otevřete `index.html` v prohlížeči.
+4. Doporučeno: spusťte jednoduchý lokální HTTP server (sdílený origin umožní, aby `localStorage` fungovalo mezi stránkami). Např.:
+
+  - Použít VS Code Live Server (doporučeno): otevřete workspace a klikněte `Go Live`.
+
+  - Nebo pomocí Python (port 5501 odpovídá `.vscode/settings.json`):
+
+```bash
+python -m http.server 5501
+```
+
+  - Nebo pomocí `http-server`:
+
+```bash
+npx http-server . -p 5501
+```
+
+5. Otevřete v prohlížeči `http://localhost:5501/index.html` a `http://localhost:5501/weekly-summary.html`.
 5. Otevřete **Developer Console** (F12) pro bezdotazí polymorfismu a testovací výstupy.
 
 ## Architektura

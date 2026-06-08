@@ -223,6 +223,14 @@
                 </div>
             </aside>
         </div>
+        <section class="panel" style="margin-top:18px;">
+            <h3 style="margin:0 0 12px">Debug (developer)</h3>
+            <div style="display:flex;gap:12px;align-items:center">
+                <button id="dbg-toggle" class="button secondary" style="background:#475569;">Zobrazit raw localStorage</button>
+                <button id="dbg-clear" class="button secondary" style="background:#ef4444;">Vymazat localStorage</button>
+            </div>
+            <pre id="dbg-pre" style="display:none; white-space:pre-wrap; background:#f8fafc; padding:12px; border-radius:8px; margin-top:12px; border:1px solid #e6edf6; max-height:320px; overflow:auto"></pre>
+        </section>
     <script>
         const STORAGE_KEY = 'fitness-activities';
         const daysOrder = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
@@ -302,6 +310,43 @@
 
         renderWeeklySummary();
         bindQuoteButtons();
+
+        // Debug bindings: zobrazit raw localStorage a možnost vymazat
+        (function bindDebug(){
+            const toggle = document.getElementById('dbg-toggle');
+            const clearBtn = document.getElementById('dbg-clear');
+            const pre = document.getElementById('dbg-pre');
+            if (!toggle || !clearBtn || !pre) return;
+
+            toggle.addEventListener('click', () => {
+                const raw = localStorage.getItem(STORAGE_KEY) || 'null';
+                let pretty;
+                try {
+                    pretty = JSON.stringify(JSON.parse(raw), null, 2);
+                } catch (err) {
+                    pretty = raw;
+                }
+                if (pre.style.display === 'none' || pre.style.display === '') {
+                    pre.textContent = pretty;
+                    pre.style.display = 'block';
+                    toggle.textContent = 'Skrýt raw localStorage';
+                    console.log('Raw localStorage:', pretty);
+                } else {
+                    pre.style.display = 'none';
+                    toggle.textContent = 'Zobrazit raw localStorage';
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                if (!confirm('Opravdu vymazat uložená data (fitness-activities)?')) return;
+                localStorage.removeItem(STORAGE_KEY);
+                pre.textContent = '';
+                pre.style.display = 'none';
+                toggle.textContent = 'Zobrazit raw localStorage';
+                renderWeeklySummary();
+                alert('LocalStorage vymazáno.');
+            });
+        })();
 
         function bindQuoteButtons() {
             document.querySelectorAll('.fact-box').forEach(box => {
