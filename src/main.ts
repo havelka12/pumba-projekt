@@ -22,18 +22,15 @@ const specificInputs = document.getElementById('specificInputs') as HTMLDivEleme
 const form = document.getElementById('activityForm') as HTMLFormElement;
 const activitiesDiv = document.getElementById('activities') as HTMLDivElement;
 const summaryDiv = document.getElementById('summary') as HTMLDivElement;
+const loginSection = document.getElementById('loginSection') as HTMLDivElement | null;
 
-// ============================================================================
-// POLE INSTANCÍ AKTIVIT
-// ============================================================================
+const STORAGE_KEY = 'fitness-activities';
 
 type SavedActivity = ActivityData & {
     day: string;
     time?: number;
     sets?: number;
 };
-
-const STORAGE_KEY = 'fitness-activities';
 
 function loadSavedActivities(): SavedActivity[] {
     try {
@@ -48,6 +45,25 @@ function loadSavedActivities(): SavedActivity[] {
 function saveActivities(activities: SavedActivity[]): void {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
 }
+
+function renderLoginSection(): void {
+    if (!loginSection) return;
+    loginSection.innerHTML = `
+        <div style="padding:14px; border-radius:16px; background:#eff6ff; border:1px solid #bfdbfe; color:#0c4a6e;">
+            <strong>Ukládání lokálně v prohlížeči</strong><br>
+            Data se ukládají jen do tohoto zařízení. Pokud chceš, můžeš později přepnout na cloud.
+        </div>
+    `;
+}
+
+function initApp(): void {
+    renderLoginSection();
+    updateDisplay();
+}
+
+// ============================================================================
+// POLE INSTANCÍ AKTIVIT
+// ============================================================================
 
 /** Pole všech přidaných aktivit během dne */
 let dailyActivities: SavedActivity[] = loadSavedActivities();
@@ -161,7 +177,7 @@ function updateSpecificInputs(): void {
  */
 activitySelect.addEventListener('change', updateSpecificInputs);
 updateSpecificInputs();
-updateDisplay();
+initApp();
 
 /**
  * Event listener - zpracování odeslání formuláře
@@ -174,13 +190,11 @@ form.addEventListener('submit', (e) => {
     const activityData = activities.find(a => a.id === selectedId);
     const day = daySelect.value;
     if (!activityData || !day) return;
-
     try {
         const saved: SavedActivity = {
             ...activityData,
             day,
         };
-
         if (activityData.type === 'cardio') {
             const timeInput = document.getElementById('timeInput') as HTMLInputElement;
             const time = parseInt(timeInput.value);
@@ -192,7 +206,6 @@ form.addEventListener('submit', (e) => {
             if (Number.isNaN(sets) || sets <= 0) throw new Error('Počet sérií musí být kladné číslo.');
             saved.sets = sets;
         }
-
         dailyActivities.push(saved);
         saveActivities(dailyActivities);
         updateDisplay();

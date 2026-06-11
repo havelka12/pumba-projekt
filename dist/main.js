@@ -1,162 +1,58 @@
-/**
- * Main Application Logic - Fitness Kalkulačka
- * 
- * Architektura:
- * 1. Načtení surových dat z data.js (ActivityData interface)
- * 2. "Oživení" dat pomocí factory funkce createActivity()
- * 3. Polymorfní práce s objekty (CardioActivity, StrengthActivity)
- * 4. Komunikace s DOM (HTML prvky)
- * 5. Testování polymorfismu v konzoli
- */
-
-// ============================================================================
-// DOM ELEMENTY
-// ============================================================================
-
 const activitySelect = document.getElementById('activitySelect');
 const specificInputs = document.getElementById('specificInputs');
+const daySelect = document.getElementById('daySelect');
 const form = document.getElementById('activityForm');
 const activitiesDiv = document.getElementById('activities');
 const summaryDiv = document.getElementById('summary');
+const loginSection = document.getElementById('loginSection');
+const STORAGE_KEY = 'fitness-activities';
 
-// ============================================================================
-// POLE INSTANCÍ AKTIVIT
-// ============================================================================
+function loadLocalActivities() {
+    try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+    } catch {
+        return [];
+    }
+}
 
-/** Pole všech přidaných aktivit během dne */
-let dailyActivities = [];
+function saveLocalActivities(activities) {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
+}
 
-// ============================================================================
-// FACTORY FUNKCE - "OŽIVENÍ" DAT
-// ============================================================================
+function renderLoginSection() {
+    if (!loginSection) return;
+    loginSection.innerHTML = `
+        <div style="padding:14px; border-radius:16px; background:#eff6ff; border:1px solid #bfdbfe; color:#0c4a6e;">
+            <strong>Ukládání lokálně v prohlížeči</strong><br>
+            Data se ukládají jen do tohoto zařízení. Pokud potřebuješ, můžeš stránku později otevřít na jiném zařízení a začít znovu.
+        </div>
+    `;
+}
 
-/**
- * Factory funkce - "oživuje" surová data ActivityData do instancí tříd
- * Toto je klíč k oddělení dat od logiky!
- * 
- * @param data - surový datový objekt z katalogu (data.js)
- * @returns Instanci příslušné třídy (CardioActivity nebo StrengthActivity)
- * @throws Error pokud je typ aktivity neznámý
- */
 function createActivity(data) {
     if (data.type === 'cardio') {
         return new CardioActivity(data.id, data.name, data.calorieRate);
-    } else if (data.type === 'strength') {
+    }
+    if (data.type === 'strength') {
         return new StrengthActivity(data.id, data.name, data.calorieRate);
-    } else {
-        throw new Error(`Neznámý typ aktivity: ${data.type}`);
     }
+    throw new Error(`Neznámý typ aktivity: ${data.type}`);
 }
 
-// ============================================================================
-// TESTOVÁNÍ POLYMORFISMU V KONZOLI
-// ============================================================================
-
-/**
- * Funkce pro testování polymorfismu
- * Projde všechny dostupné aktivity z katalogu a vytvoří jejich instance
- * Pak polymorfně zavolá jejich metody a vypíše výsledky do konzole
- * 
- * Toto demonstruje:
- * - Factory pattern (vytváření objektů)
- * - Polymorfismus (různé implementace abstraktní třídy)
- * - Encapsulation (privátní vlastnosti, protected dědičnost)
- */
-function testPolymorphism() {
-    console.log('%c=== TESTOVÁNÍ POLYMORFISMU ===', 'font-weight: bold; color: blue; font-size: 14px;');
-    console.log('Vytváření instancí aktivit z surových dat a testování polymorfismu...\n');
-
-    // Pole testovacích instancí
-    const testActivities = [];
-
-    // Vytvoříme instance z každé aktivity v katalogu
-    window.activities.forEach((activityData, index) => {
-        try {
-            const activity = createActivity(activityData);
-            testActivities.push(activity);
-            console.log(`✓ Vytvořena instance #${index + 1}: ${activity.constructor.name} - "${activity.getName()}"`);
-        } catch (error) {
-            console.error(`✗ Chyba při vytváření aktivity: ${error}`);
-        }
-    });
-
-    console.log(`\nCelkem vytvořeno instancí: ${testActivities.length}\n`);
-
-    // Nyní nastavíme specifické hodnoty a testujeme polymorfní chování
-    console.log('%c--- Nastavování konkrétních hodnot ---', 'font-weight: bold; color: green;');
-
-    if (testActivities[0] instanceof CardioActivity) {
-        testActivities[0].setTime(30);
-        console.log(`  📍 Běh: nastaveno 30 minut`);
+function createActivityFromSaved(saved) {
+    const activity = createActivity(saved);
+    if (saved.type === 'cardio' && saved.time) {
+        activity.setTime(saved.time);
     }
-
-    if (testActivities[1] instanceof CardioActivity) {
-        testActivities[1].setTime(45);
-        console.log(`  📍 Plavání: nastaveno 45 minut`);
+    if (saved.type === 'strength' && saved.sets) {
+        activity.setSets(saved.sets);
     }
-
-    if (testActivities[2] instanceof CardioActivity) {
-        testActivities[2].setTime(60);
-        console.log(`  📍 Cyklistika: nastaveno 60 minut`);
-    }
-
-    if (testActivities[3] instanceof StrengthActivity) {
-        testActivities[3].setSets(10);
-        console.log(`  📍 Silový trénink: nastaveno 10 sérií`);
-    }
-
-    if (testActivities[4] instanceof StrengthActivity) {
-        testActivities[4].setSets(12);
-        console.log(`  📍 Kettlebell: nastaveno 12 sérií`);
-    }
-
-    if (testActivities[5] instanceof CardioActivity) {
-        testActivities[5].setTime(20);
-        console.log(`  📍 Jóga: nastaveno 20 minut`);
-    }
-
-    // Polymorfní volání metod - KLÍČ K POLYMORFISMU!
-    // Každá instance má svou vlastní implementaci calculateCalories()
-    console.log('\n%c--- Polymorfní výpis všech aktivit ---', 'font-weight: bold; color: orange;');
-    console.log('Stejná metoda calculateCalories() na různých typech objektů:\n');
-    
-    let totalCalories = 0;
-    testActivities.forEach((activity, index) => {
-        const calories = activity.calculateCalories();
-        totalCalories += calories;
-        const className = activity.constructor.name;
-        const details = activity.getDetails();
-        console.log(`  ${index + 1}. ${details} [${className}]`);
-    });
-
-    console.log(`\n%cCelkem spáleno kalorií: ${totalCalories} kcal`, 'font-weight: bold; color: red; font-size: 13px;');
-    console.log('%c=== KONEC TESTOVÁNÍ ===', 'font-weight: bold; color: blue; font-size: 14px;');
-    console.log('%cPolymorfismus funguje! 🎉', 'font-weight: bold; color: green; font-size: 12px;');
+    return activity;
 }
 
-// Spustit testování při načtení stránky
-testPolymorphism();
-
-// ============================================================================
-// UI FUNKCIONALITA
-// ============================================================================
-
-/**
- * Naplnění selectu dostupnými aktivitami z katalogu
- */
-window.activities.forEach(activity => {
-    const option = document.createElement('option');
-    option.value = activity.id.toString();
-    option.textContent = activity.name;
-    activitySelect.appendChild(option);
-});
-
-/**
- * Event listener - zaznamená změnu výběru aktivity a připraví specifické inputy
- * Kolem selectu jsou specifické fieldy pro čas (cardio) nebo série (strength)
- */
-activitySelect.addEventListener('change', () => {
-    const selectedId = parseInt(activitySelect.value);
+function updateSpecificInputs() {
+    const selectedId = parseInt(activitySelect.value, 10);
     const activity = window.activities.find(a => a.id === selectedId);
     if (!activity) return;
 
@@ -182,61 +78,69 @@ activitySelect.addEventListener('change', () => {
         specificInputs.appendChild(label);
         specificInputs.appendChild(input);
     }
-});
+}
 
-/**
- * Event listener - zpracování odeslání formuláře
- * Vytváří novou instanci apropriátní třídy (factory pattern)
- * a přidává ji do denního seznamu aktivit
- */
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const selectedId = parseInt(activitySelect.value);
-    const activityData = window.activities.find(a => a.id === selectedId);
-    if (!activityData) return;
-
-    try {
-        // Používám factory funkci
-        let activity = createActivity(activityData);
-
-        // Nastavím specifickou hodnotu
-        if (activityData.type === 'cardio') {
-            const timeInput = document.getElementById('timeInput');
-            const time = parseInt(timeInput.value);
-            activity.setTime(time);
-        } else {
-            const setsInput = document.getElementById('setsInput');
-            const sets = parseInt(setsInput.value);
-            activity.setSets(sets);
-        }
-
-        dailyActivities.push(activity);
-        updateDisplay();
-        form.reset();
-        specificInputs.innerHTML = '';
-    } catch (error) {
-        alert(`Chyba: ${error}`);
-    }
-});
-
-/**
- * Funkce - aktualizace zobrazení denních aktivit a souhrnu
- * Polymorfně volá calculateCalories() na všech instancích
- */
 function updateDisplay() {
     activitiesDiv.innerHTML = '';
-    dailyActivities.forEach((activity, index) => {
-        const div = document.createElement('div');
-        div.className = 'activity';
-        div.innerHTML = `
-            <strong>${activity.getName()}</strong><br>
-            Spálené kalorie: ${activity.calculateCalories()}<br>
-            <button onclick="removeActivity(${index})">Odstranit</button>
-        `;
-        activitiesDiv.appendChild(div);
-    });
+    const dailyActivities = loadLocalActivities();
 
-    const totalCalories = dailyActivities.reduce((sum, act) => sum + act.calculateCalories(), 0);
+    const tableWrapper = document.createElement('div');
+    tableWrapper.className = 'table-wrapper';
+
+    const table = document.createElement('table');
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Den</th>
+                <th>Aktivita</th>
+                <th>Typ</th>
+                <th>Doba / série</th>
+                <th>Kalorie</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+
+    if (dailyActivities.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+            <td colspan="7" class="no-data">Zatím nejsou přidány žádné aktivity. Vyberte aktivitu a přidejte ji pomocí formuláře.</td>
+        `;
+        tbody.appendChild(emptyRow);
+    } else {
+        dailyActivities.forEach((savedActivity, index) => {
+            const activity = createActivityFromSaved(savedActivity);
+            const row = document.createElement('tr');
+            const timeLabel = savedActivity.type === 'cardio'
+                ? `${savedActivity.time || 0} min`
+                : `${savedActivity.sets || 0} ×`;
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${savedActivity.day}</td>
+                <td>${savedActivity.name}</td>
+                <td>${savedActivity.type === 'cardio' ? 'Cardio' : 'Silový'}</td>
+                <td>${timeLabel}</td>
+                <td>${activity.calculateCalories()} kcal</td>
+                <td><button type="button" onclick="removeActivity(${index})">Odstranit</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    tableWrapper.appendChild(table);
+    activitiesDiv.appendChild(tableWrapper);
+
+    const totalCalories = loadLocalActivities().reduce((sum, saved) => {
+        const activity = createActivityFromSaved(saved);
+        return sum + activity.calculateCalories();
+    }, 0);
+
     let motivation = '';
     if (totalCalories < 100) motivation = 'Začátek je důležitý! Pokračuj!';
     else if (totalCalories < 300) motivation = 'Dobře jsi začal, přidej!';
@@ -244,23 +148,98 @@ function updateDisplay() {
     else motivation = 'Wow! Jsi fitness fenomén! 🔥';
 
     summaryDiv.innerHTML = `
-        <p><strong>Celkem spálených kalorií: ${totalCalories} kcal</strong></p>
-        <p><em>${motivation}</em></p>
+        <div class="summary-card">
+            <p><strong>Celkem spálených kalorií: ${totalCalories} kcal</strong></p>
+            <p><em>${motivation}</em></p>
+        </div>
     `;
 }
 
-/**
- * Funkce - odebrání aktivity ze seznamu
- * Vystavena do globálního scope pro možnost zavolání z HTML onclick
- * 
- * @param index - pozice aktivity v poli, kterou chceme odstranit
- */
 function removeActivity(index) {
+    const dailyActivities = loadLocalActivities();
     if (index >= 0 && index < dailyActivities.length) {
         dailyActivities.splice(index, 1);
+        saveLocalActivities(dailyActivities);
         updateDisplay();
     }
 }
 
-// Vystavit removeActivity do globálního scope
+function bindQuoteButtons() {
+    document.querySelectorAll('.fact-box').forEach(box => {
+        const button = box.querySelector('.fact-badge');
+        const paragraph = box.querySelector('p');
+        const facts = (box.dataset.facts || '').split('|').map(item => item.trim()).filter(Boolean);
+        if (!button || !paragraph || facts.length === 0) return;
+
+        let activeIndex = 0;
+        button.addEventListener('click', () => {
+            activeIndex = (activeIndex + 1) % facts.length;
+            paragraph.textContent = facts[activeIndex];
+        });
+    });
+}
+
+function initApp() {
+    if (!activitySelect || !specificInputs || !daySelect || !form || !activitiesDiv || !summaryDiv) return;
+    renderLoginSection();
+
+    window.activities.forEach(activity => {
+        const option = document.createElement('option');
+        option.value = activity.id.toString();
+        option.textContent = activity.name;
+        activitySelect.appendChild(option);
+    });
+    activitySelect.selectedIndex = 0;
+    updateSpecificInputs();
+
+    activitySelect.addEventListener('change', updateSpecificInputs);
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const selectedId = parseInt(activitySelect.value, 10);
+        const activityData = window.activities.find(a => a.id === selectedId);
+        const day = daySelect.value;
+        if (!activityData || !day) return;
+
+        const saved = {
+            id: activityData.id,
+            name: activityData.name,
+            type: activityData.type,
+            calorieRate: activityData.calorieRate,
+            day: day,
+            time: undefined,
+            sets: undefined
+        };
+
+        if (activityData.type === 'cardio') {
+            const timeInput = document.getElementById('timeInput');
+            const time = parseInt(timeInput.value, 10);
+            if (Number.isNaN(time) || time <= 0) {
+                return alert('Čas musí být kladné číslo.');
+            }
+            saved.time = time;
+        } else {
+            const setsInput = document.getElementById('setsInput');
+            const sets = parseInt(setsInput.value, 10);
+            if (Number.isNaN(sets) || sets <= 0) {
+                return alert('Počet sérií musí být kladné číslo.');
+            }
+            saved.sets = sets;
+        }
+
+        const dailyActivities = loadLocalActivities();
+        dailyActivities.push(saved);
+        saveLocalActivities(dailyActivities);
+        updateDisplay();
+        form.reset();
+        specificInputs.innerHTML = '';
+        updateSpecificInputs();
+    });
+
+    updateDisplay();
+    bindQuoteButtons();
+    window.addEventListener('focus', updateDisplay);
+}
+
 window.removeActivity = removeActivity;
+initApp();

@@ -164,6 +164,9 @@
         <div class="layout-grid">
             <div>
                 <section class="panel">
+                    <div id="summary-login" style="padding:18px; border-radius:18px; border:1px solid #dbeafe; background:#ffffff; margin-bottom:18px;">
+                        <strong>Stav přihlášení:</strong> Načítám...
+                    </div>
                     <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Tréninků tento týden</h3>
@@ -226,8 +229,8 @@
         <section class="panel" style="margin-top:18px;">
             <h3 style="margin:0 0 12px">Debug (developer)</h3>
             <div style="display:flex;gap:12px;align-items:center">
-                <button id="dbg-toggle" class="button secondary" style="background:#475569;">Zobrazit raw localStorage</button>
-                <button id="dbg-clear" class="button secondary" style="background:#ef4444;">Vymazat localStorage</button>
+                <button id="dbg-toggle" class="button secondary" style="background:#475569;">Zobrazit raw data</button>
+                <button id="dbg-clear" class="button secondary" style="background:#ef4444;">Vymazat data</button>
             </div>
             <pre id="dbg-pre" style="display:none; white-space:pre-wrap; background:#f8fafc; padding:12px; border-radius:8px; margin-top:12px; border:1px solid #e6edf6; max-height:320px; overflow:auto"></pre>
         </section>
@@ -235,18 +238,24 @@
         const STORAGE_KEY = 'fitness-activities';
         const daysOrder = ['Pondělí', 'Úterý', 'Středa', 'Čtvrtek', 'Pátek', 'Sobota', 'Neděle'];
 
-        function loadSavedActivities() {
+        function loadLocalActivities() {
             try {
                 const raw = window.localStorage.getItem(STORAGE_KEY);
-                if (!raw) return [];
-                return JSON.parse(raw);
+                return raw ? JSON.parse(raw) : [];
             } catch {
                 return [];
             }
         }
 
+        function renderLocalStatus() {
+            const loginDiv = document.getElementById('summary-login');
+            if (!loginDiv) return;
+            loginDiv.innerHTML = '<strong>Data se načítají z lokálního prohlížeče.</strong>';
+        }
+
         function renderWeeklySummary() {
-            const activities = loadSavedActivities();
+            renderLocalStatus();
+            const activities = loadLocalActivities();
             const countEl = document.getElementById('stat-count');
             const caloriesEl = document.getElementById('stat-calories');
             const topEl = document.getElementById('stat-top');
@@ -308,10 +317,15 @@
             });
         }
 
+        function clearLocalData() {
+            window.localStorage.removeItem(STORAGE_KEY);
+            renderWeeklySummary();
+        }
+
         renderWeeklySummary();
         bindQuoteButtons();
+        window.addEventListener('focus', renderWeeklySummary);
 
-        // Debug bindings: zobrazit raw localStorage a možnost vymazat
         (function bindDebug(){
             const toggle = document.getElementById('dbg-toggle');
             const clearBtn = document.getElementById('dbg-clear');
@@ -319,32 +333,29 @@
             if (!toggle || !clearBtn || !pre) return;
 
             toggle.addEventListener('click', () => {
-                const raw = localStorage.getItem(STORAGE_KEY) || 'null';
-                let pretty;
-                try {
-                    pretty = JSON.stringify(JSON.parse(raw), null, 2);
-                } catch (err) {
-                    pretty = raw;
+                const data = loadLocalActivities();
+                let pretty = 'Žádná lokální data.';
+                if (data.length) {
+                    pretty = JSON.stringify(data, null, 2);
                 }
                 if (pre.style.display === 'none' || pre.style.display === '') {
                     pre.textContent = pretty;
                     pre.style.display = 'block';
-                    toggle.textContent = 'Skrýt raw localStorage';
-                    console.log('Raw localStorage:', pretty);
+                    toggle.textContent = 'Skrýt data';
+                    console.log('Aktuální lokální data:', pretty);
                 } else {
                     pre.style.display = 'none';
-                    toggle.textContent = 'Zobrazit raw localStorage';
+                    toggle.textContent = 'Zobrazit data';
                 }
             });
 
             clearBtn.addEventListener('click', () => {
-                if (!confirm('Opravdu vymazat uložená data (fitness-activities)?')) return;
-                localStorage.removeItem(STORAGE_KEY);
+                if (!confirm('Opravdu vymazat lokální uložená data?')) return;
+                clearLocalData();
                 pre.textContent = '';
                 pre.style.display = 'none';
-                toggle.textContent = 'Zobrazit raw localStorage';
-                renderWeeklySummary();
-                alert('LocalStorage vymazáno.');
+                toggle.textContent = 'Zobrazit data';
+                alert('Lokální data byla vymazána.');
             });
         })();
 
